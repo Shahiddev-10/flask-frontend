@@ -5,4 +5,5 @@ python-socketio==5.11.3
 pandas==2.3.2
 requests==2.32.3
 gunicorn
-eventlet
+gevent
+gevent-websocket

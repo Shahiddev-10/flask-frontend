@@ -3,9 +3,6 @@ from datetime import datetime
 from collections import defaultdict
 from typing import Dict, Any, List
 
-import eventlet
-eventlet.monkey_patch()
-
 import pandas as pd
 import requests
 from flask import Flask, request, jsonify, send_file, render_template
@@ -16,7 +13,7 @@ app.config["SECRET_KEY"] = "dev"
 # socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # Initialize SocketIO with eventlet async mode
-socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
+socketio = SocketIO(app, async_mode='gevent', cors_allowed_origins="*")
 
 os.makedirs("uploads", exist_ok=True)
 os.makedirs("outputs", exist_ok=True)
@@ -361,7 +358,7 @@ def call_llm(service, model, api_key, messages, temperature, max_tokens, retries
         except Exception as e:
             if attempt == retries - 1:
                 return None, str(e)
-            time.sleep(1.5 * (attempt + 1))  # simple backoff
+            socketio.sleep(1.5 * (attempt + 1))  # simple backoff
 
 
 def cooperative_sleep(total_seconds):
@@ -370,7 +367,7 @@ def cooperative_sleep(total_seconds):
         with lock:
             if PROCESS["stopped"] or PROCESS["paused"]:
                 return
-        time.sleep(0.1)
+        socketio.sleep(0.1)
 
 
 
