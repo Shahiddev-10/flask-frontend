@@ -1,0 +1,20 @@
+[
+  {
+    "topic": "AI tools",
+    "target_audience": "developers",
+    "category": "technology",
+    "priority": "high"
+  },
+  {
+    "topic": "Healthy eating",
+    "target_audience": "students",
+    "category": "health",
+    "priority": "medium"
+  },
+  {
+    "topic": "Travel tips",
+    "target_audience": "solo travelers",
+    "category": "lifestyle",
+    "priority": "low"
+  }
+]

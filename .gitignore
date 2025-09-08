@@ -1,0 +1,29 @@
+# Python
+*.pyc
+__pycache__/
+.Python
+env/
+venv/
+.env
+
+# Flask specific
+instance/
+.webassets-cache/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+sample_input_files/
+
+# Distribution
+dist/
+build/
+*.egg-info/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-*
+*.DS_Store
