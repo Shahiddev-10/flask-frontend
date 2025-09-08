@@ -3,6 +3,9 @@ from datetime import datetime
 from collections import defaultdict
 from typing import Dict, Any, List
 
+import eventlet
+eventlet.monkey_patch()
+
 import pandas as pd
 import requests
 from flask import Flask, request, jsonify, send_file, render_template
@@ -10,7 +13,10 @@ from flask_socketio import SocketIO
 
 app = Flask(__name__, template_folder="templates")
 app.config["SECRET_KEY"] = "dev"
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
+# socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
+
+# Initialize SocketIO with eventlet async mode
+socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 
 os.makedirs("uploads", exist_ok=True)
 os.makedirs("outputs", exist_ok=True)
