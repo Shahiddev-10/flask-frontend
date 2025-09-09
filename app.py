@@ -246,7 +246,8 @@ def run_batch(df: pd.DataFrame, cfg: Dict[str, Any]):
         # Call model with retries
         response_text, err = call_llm(
             service=svc,
-            model=model,
+            # model=model,
+            model="openai/gpt-oss-20b:free",
             api_key=api_key,
             messages=messages,
             temperature=temperature,
