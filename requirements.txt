@@ -7,3 +7,4 @@ requests==2.32.3
 gunicorn
 gevent
 gevent-websocket
+eventlet

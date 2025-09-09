@@ -13,7 +13,8 @@ app.config["SECRET_KEY"] = "dev"
 # socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 # Initialize SocketIO with eventlet async mode
-socketio = SocketIO(app, async_mode='gevent', cors_allowed_origins="*")
+# socketio = SocketIO(app, async_mode='gevent', cors_allowed_origins="*")
+socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
 
 os.makedirs("uploads", exist_ok=True)
 os.makedirs("outputs", exist_ok=True)
