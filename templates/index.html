@@ -960,7 +960,7 @@ Make it engaging and informative.</textarea>
         }
         
         function stopProcessing() {
-            if (confirm('Are you sure you want to stop processing? Current progress will be saved.')) {
+            if (confirm('Are you sure you want to stop processing?')) {
                 fetch('/stop_processing', {
                     method: 'POST'
                 })
@@ -982,11 +982,9 @@ Make it engaging and informative.</textarea>
         }
         
         function updateProgress(current, total) {
-            const percent = total ? Math.round((current / total) * 100) : 0;
-            const bar = document.getElementById('progressBar');
-            bar.style.width = percent + '%';
-            bar.setAttribute('aria-valuenow', percent);
-            document.getElementById('progressLabel').textContent = `${current}/${total} (${percent}%)`;
+            const percent = total > 0 ? (current / total) * 100 : 0;
+            document.getElementById('progressFill').style.width = `${percent.toFixed(1)}%`;
+            document.getElementById('progressStatus').innerHTML = `<strong>Status:</strong> ${current}/${total} completed`;
         }
 
         

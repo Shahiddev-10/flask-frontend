@@ -79,7 +79,7 @@ def upload():
 @app.post("/start_processing")
 def start_processing():
     with lock:
-        if PROCESS["thread"] and PROCESS["thread"].is_alive():
+        if PROCESS["thread"]:
             return jsonify({"error": "Processing already running"}), 400
 
         cfg = request.get_json(force=True)
@@ -113,15 +113,11 @@ def start_processing():
             "results": [],
             "format": cfg["output"]["format"],
             "output_dir": cfg["output"]["directory"].rstrip("/"),
+            "thread": None,
         })
 
-        # Spawn worker thread
-        PROCESS["thread"] = threading.Thread(
-            target=run_batch,
-            args=(df, cfg),
-            daemon=True
-        )
-        PROCESS["thread"].start()
+        # Spawn background task (eventlet safe)
+        PROCESS["thread"] = socketio.start_background_task(run_batch, df, cfg)
 
     return jsonify({"status": "started"})
 
@@ -222,8 +218,10 @@ def run_batch(df: pd.DataFrame, cfg: Dict[str, Any]):
                 paused = PROCESS["paused"]
             if not paused:
                 break
-            cooperative_sleep(0.2)
+            socketio.sleep(0.2)  # eventlet-friendly sleep
 
+        if PROCESS["stopped"]:
+            break
 
         # Build variables dict from row
         vars_map = {str(k): ("" if pd.isna(v) else v) for k, v in row.to_dict().items()}
@@ -246,8 +244,7 @@ def run_batch(df: pd.DataFrame, cfg: Dict[str, Any]):
         # Call model with retries
         response_text, err = call_llm(
             service=svc,
-            # model=model,
-            model="openai/gpt-oss-20b:free",
+            model=model,
             api_key=api_key,
             messages=messages,
             temperature=temperature,
@@ -291,11 +288,17 @@ def run_batch(df: pd.DataFrame, cfg: Dict[str, Any]):
             PROCESS["eta"] = eta_seconds
 
         socketio.emit("progress_update", {"current": processed, "total": total, "group": group})
+        socketio.sleep(delay)  # eventlet sleep
 
-        # Simple rate-limit sleep
-        cooperative_sleep(delay)
+    # Always emit batch_completed (even if stopped early)
+    socketio.emit("batch_completed", {
+        "total_processed": PROCESS["processed"],
+        "total_errors": errors,
+        "stopped": PROCESS["stopped"]
+    })
 
-    socketio.emit("batch_completed", {"total_processed": PROCESS["processed"], "total_errors": errors})
+    with lock:
+        PROCESS["thread"] = None
 
 
 def safe_format_blank_missing(template: str, variables: Dict[str, Any]) -> str:
