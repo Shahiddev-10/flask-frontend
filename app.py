@@ -1,3 +1,5 @@
+import eventlet
+eventlet.monkey_patch()
 import re, os, io, time, json, zipfile, threading
 from datetime import datetime
 from collections import defaultdict
@@ -7,6 +9,7 @@ import pandas as pd
 import requests
 from flask import Flask, request, jsonify, send_file, render_template
 from flask_socketio import SocketIO
+from eventlet.semaphore import Semaphore
 
 app = Flask(__name__, template_folder="templates")
 app.config["SECRET_KEY"] = "dev"
@@ -33,7 +36,8 @@ PROCESS = {
     "format": "csv",     # output format selected
     "output_dir": "outputs",
 }
-lock = threading.Lock()
+
+lock = Semaphore()
 
 
 @app.route("/")

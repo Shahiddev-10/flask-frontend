@@ -640,7 +640,7 @@ Make it engaging and informative.</textarea>
                     }
                 })
                 .catch(() => {});
-            }, 1500);
+            }, 5000);
         }
 
         // Initialize socket connection
@@ -653,10 +653,7 @@ Make it engaging and informative.</textarea>
             
             socket.on('progress_update', function (data) {
                 updateProgress(data.current, data.total);
-                const group = data.group || '-';
-                addLogEntry(`✓ Completed item ${data.current} (group: ${group})`);
             });
-
             
             socket.on('item_completed', function(data) {
                 const idx = typeof data.index === 'number' ? data.index : '';
@@ -969,6 +966,10 @@ Make it engaging and informative.</textarea>
                     addLogEntry('⏹️ Processing stopped by user');
                     document.getElementById('startBtn').disabled = false;
                     document.getElementById('startBtn').textContent = '🚀 Start Batch Processing';
+                    if (statusTimer) {
+                        clearInterval(statusTimer);
+                        statusTimer = null;
+                    }
                 })
                 .catch(error => {
                     showAlert(`Stop error: ${error.message}`, 'error');
